@@ -14,19 +14,31 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class FeedActivity extends AppCompatActivity {
 
     static final int RC_PERMISSION_READ_EXTERNAL_STORAGE = 3;
     static final int RC_IMAGE_GALLERY = 4;
 
+    FirebaseUser user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            finish();
+        }
     }
 
     public void uploadImageClick(View view) {
@@ -46,8 +58,10 @@ public class FeedActivity extends AppCompatActivity {
 
             StorageReference storageRef = FirebaseStorage.getInstance().getReference();
             StorageReference imagesRef = storageRef.child("images");
-            String filename = "test";
-            StorageReference fileRef = imagesRef.child(filename);
+            StorageReference userRef = imagesRef.child(user.getUid());
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String filename = user.getUid() + "_" + timeStamp;
+            StorageReference fileRef = userRef.child(filename);
 
             UploadTask uploadTask = fileRef.putFile(uri);
             uploadTask.addOnFailureListener(new OnFailureListener() {
