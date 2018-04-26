@@ -16,6 +16,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -29,6 +31,7 @@ public class FeedActivity extends AppCompatActivity {
     static final int RC_IMAGE_GALLERY = 4;
 
     FirebaseUser user;
+    DatabaseReference database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,8 @@ public class FeedActivity extends AppCompatActivity {
         if (user == null) {
             finish();
         }
+
+        database = FirebaseDatabase.getInstance().getReference();
     }
 
     public void uploadImageClick(View view) {
@@ -75,6 +80,11 @@ public class FeedActivity extends AppCompatActivity {
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     Uri downloadUrl = taskSnapshot.getDownloadUrl();
                     Toast.makeText(FeedActivity.this, "Upload finished!", Toast.LENGTH_SHORT).show();
+
+                    // save image to database
+                    Image image = new Image(user.getUid(), downloadUrl.toString());
+                    String key = database.child("images").push().getKey();
+                    database.child("images").child(key).setValue(image);
                 }
             });
         }
