@@ -50,6 +50,10 @@ public class MainActivity extends AppCompatActivity {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 updateUI(user);
+
+                // go to feed activity
+                Intent intent = new Intent(this, FeedActivity.class);
+                startActivity(intent);
             } else {
                 // Sign in failed, check response for error code
                 Toast.makeText(this, response.getError().getMessage(), Toast.LENGTH_SHORT).show();
