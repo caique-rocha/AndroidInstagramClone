@@ -9,6 +9,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -16,27 +19,39 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class FeedActivity extends AppCompatActivity {
 
     static final int RC_PERMISSION_READ_EXTERNAL_STORAGE = 3;
     static final int RC_IMAGE_GALLERY = 4;
+    static final String TAG = "FeedActivity";
 
     FirebaseUser user;
     DatabaseReference database;
+    RecyclerView recyclerView;
+    ImageAdapter mAdapter;
+    RecyclerView.LayoutManager mLayoutManager;
+    ArrayList<Image> images = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
+
+        recyclerView = findViewById(R.id.recyclerView);
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
@@ -44,6 +59,63 @@ public class FeedActivity extends AppCompatActivity {
         }
 
         database = FirebaseDatabase.getInstance().getReference();
+
+        mLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(mLayoutManager);
+
+        mAdapter = new ImageAdapter(images);
+        recyclerView.setAdapter(mAdapter);
+
+        Query imagesQuery = database.child("images")
+                .orderByKey();
+
+        imagesQuery.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
+
+                // A new image has been added, add it to the displayed list
+                Image image = dataSnapshot.getValue(Image.class);
+
+                mAdapter.addImage(image);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
+
+                // A comment has changed, use the key to determine if we are displaying this
+                // comment and if so displayed the changed comment.
+                Image newImage = dataSnapshot.getValue(Image.class);
+                String imageKey = dataSnapshot.getKey();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+
+                // A comment has changed, use the key to determine if we are displaying this
+                // comment and if so remove it.
+                String imageKey = dataSnapshot.getKey();
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
+
+                // A comment has changed position, use the key to determine if we are
+                // displaying this comment and if so move it.
+                Image movedComment = dataSnapshot.getValue(Image.class);
+                String imageKey = dataSnapshot.getKey();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "postComments:onCancelled", databaseError.toException());
+                Toast.makeText(getApplicationContext(), "Failed to load comments.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void uploadImageClick(View view) {
