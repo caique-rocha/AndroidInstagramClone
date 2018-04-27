@@ -4,7 +4,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -17,9 +20,11 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView mTextView;
+        public ImageView mImageView;
         public ViewHolder(View v) {
             super(v);
             mTextView = v.findViewById(R.id.textView2);
+            mImageView = v.findViewById(R.id.imageView);
         }
     }
 
@@ -46,7 +51,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         holder.mTextView.setText(mDataset.get(position).downloadUrl);
-
+        Picasso.get().load(mDataset.get(position).downloadUrl).into(holder.mImageView);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
