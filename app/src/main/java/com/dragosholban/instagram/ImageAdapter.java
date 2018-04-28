@@ -7,8 +7,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -52,7 +50,9 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.mTextView.setText(mDataset.get(position).downloadUrl);
+        if (mDataset.get(position).getUser() != null) {
+            holder.mTextView.setText(mDataset.get(position).getUser().displayName);
+        }
         Picasso.get().load(mDataset.get(position).downloadUrl).into(holder.mImageView);
     }
 

@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -75,7 +76,23 @@ public class FeedActivity extends AppCompatActivity {
                 Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
 
                 // A new image has been added, add it to the displayed list
-                Image image = dataSnapshot.getValue(Image.class);
+                final Image image = dataSnapshot.getValue(Image.class);
+
+                database.child("users/" + image.userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Log.d(TAG, "onDataChange:" + dataSnapshot.getKey());
+
+                        User user = dataSnapshot.getValue(User.class);
+                        image.setUser(user);
+                        mAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
 
                 mAdapter.addImage(image);
             }

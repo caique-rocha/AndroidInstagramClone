@@ -7,6 +7,7 @@ public class Image {
 
     public String userId;
     public String downloadUrl;
+    private User user;
 
     public Image() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
@@ -17,4 +18,11 @@ public class Image {
         this.downloadUrl = downloadUrl;
     }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return this.user;
+    }
 }
