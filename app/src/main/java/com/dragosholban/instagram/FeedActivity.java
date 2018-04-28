@@ -67,7 +67,7 @@ public class FeedActivity extends AppCompatActivity {
         recyclerView.setAdapter(mAdapter);
 
         Query imagesQuery = database.child("images")
-                .orderByKey();
+                .orderByKey().limitToFirst(100);
 
         imagesQuery.addChildEventListener(new ChildEventListener() {
             @Override

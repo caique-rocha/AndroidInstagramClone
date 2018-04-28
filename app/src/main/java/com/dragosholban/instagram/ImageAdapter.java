@@ -61,7 +61,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     }
 
     public void addImage(Image image) {
-        mDataset.add(image);
+        mDataset.add(0, image);
         notifyDataSetChanged();
     }
 }
